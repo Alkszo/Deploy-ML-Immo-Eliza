@@ -3,6 +3,7 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.metrics import r2_score
+import pickle
 
 
 class KNNModel:
@@ -19,14 +20,14 @@ class KNNModel:
         self.model = KNeighborsRegressor(n_neighbors=n_neighbors, p=p, weights=weights, algorithm=algorithm)
 
 
-    def fit_model(self, X_train, y_train):
+    def fit_model(self, X_train, y_train) -> None:
         """
         The method to fit (train) the model
         """        
         self.model.fit(X_train, y_train)
 
 
-    def evaluate_model(self):
+    def evaluate_model(self) -> None:
         """
         The main method of model class, it will fit and evaluate the model along different metrics
         """
@@ -46,4 +47,8 @@ class KNNModel:
 
         print(f'Values for (train/test)\nMean absolute error: {MAE_train} / {MAE}\nMean squared error: {RMSE_train} / {RMSE}\nR2 score: {R2_train} / {R2}\nMean absolute procentage error:  {MAPE_train * 100}% / {MAPE * 100}%')
     
-    
+    def save_knn(self) -> None:
+        """
+        Method for saving model to json format for deployment
+        """
+        pickle.dump(self.model, open('knn_reg.sav', 'wb'))

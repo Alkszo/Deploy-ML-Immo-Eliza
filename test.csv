@@ -1,0 +1,2 @@
+zip_code,commune,province,type_of_property,subtype_of_property,price,building_condition,facade_number,living_area,equipped_kitchen,bedroom_nr,swimming_pool,furnished,open_fire,terrace,garden,plot_surface,sub_property_group_encoded
+2100,Antwerpen,Antwerpen,0,apartment,248000.0,good,2.0,91,installed,3,0,0,0,2.0,0,0,apartments
