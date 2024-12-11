@@ -107,6 +107,9 @@ class Preprocessor:
 
         return X, y
     
+    def save_scaler(self):
+        self.get_Xy()[0].to_csv('scaling_matrix.csv', index=False)
+
     def get_train_test(self) -> tuple:
         """
         This method performs splits the data into training and testing set to be fed to model, it also resamples dataset to account for unequal datapoints distribution
