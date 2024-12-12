@@ -26,10 +26,9 @@ def preprocessing(input):
         }
     
     building_condition_mapping = {
-        'good': 3,
-        'no info': 2,
-        'to renovate': 1,
-        'to restore': 0
+        'good': 2,
+        'no info': 1,
+        'to renovate': 0,
         }
     
     kitchen_mapping = {
