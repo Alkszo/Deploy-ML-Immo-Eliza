@@ -1,8 +1,8 @@
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
-socecon = pd.read_csv('model/data/soceconvert.csv')
-scale_matrix = pd.read_csv('model/scaling_matrix.csv')
+socecon = pd.read_csv('soceconvert.csv')
+scale_matrix = pd.read_csv('scaling_matrix.csv')
 
 def preprocessing(input):
     processed = pd.merge(input, socecon.drop(columns=['refnis', 'commune']), on='zip_code', how='left')
