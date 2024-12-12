@@ -59,8 +59,7 @@ if st.button('Predict Price'):
             swimming_pool = 0
         d = {'type_of_property': [type_of_property], 'zip_code': [zip_code], 'living_area': [stsess.living_area_num], 'bedroom_nr': [bedroom_nr], 'terrace': [terrace], 'garden': [stsess.garden_num], 'plot_surface': [stsess.plot_surface_num],
              'subtype_of_property': [subtype_of_property], 'building_condition': [building_condition], 'equipped_kitchen': [equipped_kitchen], 'swimming_pool': [swimming_pool]}
-        df_input = pd.DataFrame(data=d)
-        #st.dataframe(df_input)
+        df_input = pd.DataFrame(data=d)        
         input_transformed = preprocessing(df_input)
         prediction = '{:,.0f}'.format(round(predict(input_transformed)))
         st.success(f"The predicted price of this property is {prediction} €")

@@ -51,4 +51,6 @@ class KNNModel:
         """
         Method for saving model to json format for deployment
         """
+        X_train, X_test, y_train, y_test = self.train_test
+        self.fit_model(X_train, y_train)
         pickle.dump(self.model, open('knn_reg.sav', 'wb'))

@@ -73,9 +73,9 @@ class Preprocessor:
 
         #mapping of building condition
         building_condition_mapping = {
-        'good': 3,
-        'no info': 2,
-        'to renovate': 1,
+        'good': 2,
+        'no info': 1,
+        'to renovate': 0,
         'to restore': 0
         }
         self.dataframe['building_condition'] = self.dataframe['building_condition'].map(building_condition_mapping)
