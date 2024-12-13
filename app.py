@@ -2,10 +2,33 @@ import streamlit as st
 import pandas as pd
 from preprocessing import preprocessing
 from predict import predict
+socecon = pd.read_csv('soceconvert.csv')
+commune_names = sorted(socecon.drop_duplicates(subset='commune').commune.to_list())
+zipcodes = socecon.zip_code.to_list()
+commune_dict = socecon.drop_duplicates(subset='commune')[['zip_code', 'commune']].set_index('commune').to_dict()['zip_code']
+zip_dict = socecon[['zip_code', 'commune']].set_index('zip_code').to_dict()['commune']
 
 st.header('Input property characteristics')
 
 stsess = st.session_state
+
+if 'wrong_zip_message' not in stsess:
+    stsess['wrong_zip_message'] = ''
+
+def zip_num_change():
+    if stsess.zip_num not in zipcodes:
+        stsess.wrong_zip_message = 'This zip code does not exist, input a valid one or select from the list'
+        stsess.zip_text = None
+    else:
+        stsess.wrong_zip_message = ''
+        stsess.zip_text = zip_dict[stsess.zip_num]
+
+def zip_text_change():
+    stsess.wrong_zip_message = ''
+    if stsess.zip_text != None:
+        stsess.zip_num = commune_dict[stsess.zip_text]
+    else:
+        stsess.zip_num = None
 
 def update_plot_slide():
     stsess.plot_surface_slide = stsess.plot_surface_num
@@ -37,7 +60,10 @@ if type_of_property == 'House':
 else:
     subtype_of_property = st.selectbox('Type of property:', ['apartment', 'service flat', 'flat studio','kot', 'ground floor', 'exceptional property', 'penthouse', 'loft' ])
 st.divider()
-zip_code = st.number_input('Zip Code:', min_value=1000, max_value=10000, value=1000)
+#zip_code = st.number_input('Zip Code:', min_value=1000, max_value=10000, value=1000)
+st.selectbox(label='Commune name', options=commune_names, index=89, key='zip_text', on_change=zip_text_change)
+st.number_input('Zip Code:', min_value=1000, max_value=10000, value=1000, key='zip_num', on_change=zip_num_change)
+st.write(stsess.wrong_zip_message)
 st.divider()
 living_area_num = st.number_input('Living Area:', min_value=10, max_value=400, value=100, key='living_area_num', on_change=update_living_slide)
 living_area_slide = st.slider('Living Area:', min_value=10, max_value=400, value=100, key='living_area_slide', label_visibility='hidden', on_change=update_living_num)
@@ -45,17 +71,20 @@ st.divider()
 bedroom_nr = st.slider('Number of Bedrooms:', min_value=0, max_value=10, value=2)
 terrace = st.slider('Terrace surface:', min_value=0, max_value=100, value=10)
 st.divider()
-garden_num = st.number_input('Garden space:', min_value=0, max_value=500, value=0, key='garden_num', on_change=update_garden_slide)
-garden_slide = st.slider('Garden space:', min_value=0, max_value=500, value=0, key='garden_slide', label_visibility='hidden', on_change=update_garden_num)
+if type_of_property == 'House':
+    garden_num = st.number_input('Garden space:', min_value=0, max_value=500, value=0, key='garden_num', on_change=update_garden_slide)
+    garden_slide = st.slider('Garden space:', min_value=0, max_value=500, value=0, key='garden_slide', label_visibility='hidden', on_change=update_garden_num)
+else:
+    garden_num = st.number_input('Garden space:', min_value=0, max_value=500, value=0, key='garden_num', on_change=update_garden_slide, disabled=True)
+    garden_slide = st.slider('Garden space:', min_value=0, max_value=500, value=0, key='garden_slide', label_visibility='hidden', on_change=update_garden_num, disabled=True)
 st.divider()
 if type_of_property == 'House':
     plot_surface_num = st.number_input('Land plot surface:', min_value=0, max_value=1000, value=0, key='plot_surface_num', on_change=update_plot_slide)
     plot_surface_slide = st.slider('Land plot surface:', min_value=0, max_value=1000, value=0, key='plot_surface_slide', label_visibility='hidden', on_change=update_plot_num)
-    st.divider()
 else:
     plot_surface_num = st.number_input('Land plot surface:', min_value=0, max_value=1000, value=0, key='plot_surface_num', on_change=update_plot_slide, disabled=True)
     plot_surface_slide = st.slider('Land plot surface:', min_value=0, max_value=1000, value=0, key='plot_surface_slide', label_visibility='hidden', on_change=update_plot_num, disabled=True)
-    st.divider()
+st.divider()
 col1, buff, col2 = st.columns([2,1,2])
 with col1: 
     building_condition = st.select_slider('Building condition:', ['no info', 'good', 'to renovate'])
@@ -74,7 +103,7 @@ if st.button('Predict Price'):
             swimming_pool = 1
         else:
             swimming_pool = 0
-        d = {'type_of_property': [type_of_property], 'zip_code': [zip_code], 'living_area': [stsess.living_area_num], 'bedroom_nr': [bedroom_nr], 'terrace': [terrace], 'garden': [stsess.garden_num], 'plot_surface': [stsess.plot_surface_num],
+        d = {'type_of_property': [type_of_property], 'zip_code': [stsess.zip_num], 'living_area': [stsess.living_area_num], 'bedroom_nr': [bedroom_nr], 'terrace': [terrace], 'garden': [stsess.garden_num], 'plot_surface': [stsess.plot_surface_num],
              'subtype_of_property': [subtype_of_property], 'building_condition': [building_condition], 'equipped_kitchen': [equipped_kitchen], 'swimming_pool': [swimming_pool]}
         df_input = pd.DataFrame(data=d)
         #st.dataframe(df_input)      
