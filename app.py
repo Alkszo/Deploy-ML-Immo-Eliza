@@ -18,13 +18,15 @@ st.header('Input property characteristics')
 
 stsess = st.session_state
 
+#initialize necessary session states
 if 'wrong_zip_message' not in stsess:
     stsess['wrong_zip_message'] = ''
 
 if 'df_results' not in stsess:
     stsess['df_results'] = pd.DataFrame(columns = ['predicted price', 'property type', 'locality', 'zipcode', 'living area', 'bedroom nr', 'terrace m2', 'garden m2', 'land plot m2', 'building condition', 'kitchen state', 'swimming pool'])
 
-def zip_num_change():
+#utility functions for synchronizing inputs between different types of widgets
+def zip_num_change() -> None:
     if stsess.zip_num not in zipcodes:
         stsess.wrong_zip_message = 'This zip code does not exist, input a valid one or select from the list'
         stsess.zip_text = None
@@ -32,37 +34,38 @@ def zip_num_change():
         stsess.wrong_zip_message = ''
         stsess.zip_text = zip_dict[stsess.zip_num]
 
-def zip_text_change():
+def zip_text_change() -> None:
     stsess.wrong_zip_message = ''
     if stsess.zip_text != None:
         stsess.zip_num = commune_dict[stsess.zip_text]
     else:
         stsess.zip_num = None
 
-def update_plot_slide():
+def update_plot_slide() -> None:
     stsess.plot_surface_slide = stsess.plot_surface_num
 
-def update_plot_num():
+def update_plot_num() -> None:
     stsess.plot_surface_num = stsess.plot_surface_slide
 
-def update_living_slide():
+def update_living_slide() -> None:
     stsess.living_area_slide = stsess.living_area_num
 
-def update_living_num():
+def update_living_num() -> None:
     stsess.living_area_num = stsess.living_area_slide
 
-def update_garden_slide():
+def update_garden_slide() -> None:
     stsess.garden_slide = stsess.garden_num
 
-def update_garden_num():
+def update_garden_num() -> None:
     stsess.garden_num = stsess.garden_slide
 
-def reset_outside():
+def reset_outside() -> None:
     stsess.garden_num = 0
     stsess.garden_slide = 0
     stsess.plot_surface_num = 0
     stsess.plot_surface_slide = 0
 
+#main site content, inputs of real estate properties
 type_of_property = st.radio('House or Apartment:', ['House', 'Apartment'], on_change=reset_outside)
 if type_of_property == 'House':
     subtype_of_property = st.selectbox('Type of property:', ['house', 'chalet', 'town house', 'bungalow', 'duplex', 'apartment block', 'triplex', 'farmhouse', 'country cottage', 'mixed use building', 'manor house', 'exceptional property', 'villa', 'mansion'])
@@ -70,7 +73,6 @@ else:
     subtype_of_property = st.selectbox('Type of property:', ['apartment', 'service flat', 'flat studio','kot', 'ground floor', 'exceptional property', 'penthouse', 'loft' ])
 st.divider()
 st.selectbox(label='Commune name', options=commune_names, index=89, key='zip_text', on_change=zip_text_change)
-#st.number_input('Zip Code:', min_value=1000, max_value=10000, value=1000, key='zip_num', on_change=zip_num_change)
 st.selectbox(label='Zip Code:', options=zipcodes, key='zip_num', on_change=zip_num_change)
 st.write(stsess.wrong_zip_message)
 st.divider()
@@ -101,6 +103,7 @@ with col2:
     equipped_kitchen = st.select_slider('Kitchen:', ['equipped', 'installed', 'not installed'])
 swimming_pool = st.radio('Property has swimming pool:', ['No', 'Yes'])
 
+#price predict button calling the model and adding results to queries history dataframe
 if st.button('Predict Price'):
     try:
         if type_of_property == 'House':
@@ -126,11 +129,12 @@ if st.button('Predict Price'):
     except:
         st.success(f"Invalid input, check zip code and try again")
         
-
+#function do download query resolts
 @st.cache_data
-def convert_df(df):    
+def convert_df(df) -> None:
     return df.to_csv(index=False).encode("utf-8")
 
+#display query history and download buttn
 if len(stsess.df_results) > 0:
     csv_file = convert_df(stsess.df_results)
     st.write('Previous queries')
