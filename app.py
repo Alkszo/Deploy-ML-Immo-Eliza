@@ -8,6 +8,12 @@ zipcodes = socecon.zip_code.to_list()
 commune_dict = socecon.drop_duplicates(subset='commune')[['zip_code', 'commune']].set_index('commune').to_dict()['zip_code']
 zip_dict = socecon[['zip_code', 'commune']].set_index('zip_code').to_dict()['commune']
 
+st.set_page_config(
+    page_title="Real Estate Price Predictions",
+    page_icon="🏘️",
+    layout="centered",
+)
+
 st.header('Input property characteristics')
 
 stsess = st.session_state
@@ -63,9 +69,9 @@ if type_of_property == 'House':
 else:
     subtype_of_property = st.selectbox('Type of property:', ['apartment', 'service flat', 'flat studio','kot', 'ground floor', 'exceptional property', 'penthouse', 'loft' ])
 st.divider()
-#zip_code = st.number_input('Zip Code:', min_value=1000, max_value=10000, value=1000)
 st.selectbox(label='Commune name', options=commune_names, index=89, key='zip_text', on_change=zip_text_change)
-st.number_input('Zip Code:', min_value=1000, max_value=10000, value=1000, key='zip_num', on_change=zip_num_change)
+#st.number_input('Zip Code:', min_value=1000, max_value=10000, value=1000, key='zip_num', on_change=zip_num_change)
+st.selectbox(label='Zip Code:', options=zipcodes, key='zip_num', on_change=zip_num_change)
 st.write(stsess.wrong_zip_message)
 st.divider()
 living_area_num = st.number_input('Living Area:', min_value=10, max_value=400, value=100, key='living_area_num', on_change=update_living_slide)
@@ -108,8 +114,7 @@ if st.button('Predict Price'):
             swimming_pool = 0
         d = {'type_of_property': [type_of_property], 'zip_code': [stsess.zip_num], 'living_area': [stsess.living_area_num], 'bedroom_nr': [bedroom_nr], 'terrace': [terrace], 'garden': [stsess.garden_num], 'plot_surface': [stsess.plot_surface_num],
              'subtype_of_property': [subtype_of_property], 'building_condition': [building_condition], 'equipped_kitchen': [equipped_kitchen], 'swimming_pool': [swimming_pool]}
-        df_input = pd.DataFrame(data=d)
-        #st.dataframe(df_input)      
+        df_input = pd.DataFrame(data=d)             
         input_transformed = preprocessing(df_input)
         prediction = '{:,.0f}'.format(round(predict(input_transformed)))
         st.success(f"The predicted price of this property is {prediction} €")
