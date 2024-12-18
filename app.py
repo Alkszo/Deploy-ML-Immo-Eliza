@@ -15,6 +15,9 @@ stsess = st.session_state
 if 'wrong_zip_message' not in stsess:
     stsess['wrong_zip_message'] = ''
 
+if 'df_results' not in stsess:
+    stsess['df_results'] = pd.DataFrame(columns = ['predicted price', 'property type', 'locality', 'zipcode', 'living area', 'bedroom nr', 'terrace m2', 'garden m2', 'land plot m2', 'building condition', 'kitchen state', 'swimming pool'])
+
 def zip_num_change():
     if stsess.zip_num not in zipcodes:
         stsess.wrong_zip_message = 'This zip code does not exist, input a valid one or select from the list'
@@ -87,7 +90,7 @@ else:
 st.divider()
 col1, buff, col2 = st.columns([2,1,2])
 with col1: 
-    building_condition = st.select_slider('Building condition:', ['no info', 'good', 'to renovate'])
+    building_condition = st.select_slider('Building condition:', ['good', 'no info', 'to renovate'])
 with col2:
     equipped_kitchen = st.select_slider('Kitchen:', ['equipped', 'installed', 'not installed'])
 swimming_pool = st.radio('Property has swimming pool:', ['No', 'Yes'])
@@ -110,6 +113,21 @@ if st.button('Predict Price'):
         input_transformed = preprocessing(df_input)
         prediction = '{:,.0f}'.format(round(predict(input_transformed)))
         st.success(f"The predicted price of this property is {prediction} €")
+
+        stsess.df_results = pd.concat([stsess.df_results, pd.DataFrame({'predicted price': [prediction], 'property type': [subtype_of_property], 'locality': [stsess.zip_text], 'zipcode': [stsess.zip_num], 
+        'living area': [stsess.living_area_num], 'bedroom nr': [bedroom_nr], 'terrace m2': [terrace], 'garden m2': [stsess.garden_num], 'land plot m2': [stsess.plot_surface_num], 
+        'building condition': [building_condition], 'kitchen state': [equipped_kitchen], 'swimming pool': [swimming_pool]})], ignore_index=True)
         
     except:
-        st.success(f"You can't afford any property. Should have eaten less avocado toasts!")
+        st.success(f"Invalid input, check zip code and try again")
+        
+
+@st.cache_data
+def convert_df(df):    
+    return df.to_csv(index=False).encode("utf-8")
+
+if len(stsess.df_results) > 0:
+    csv_file = convert_df(stsess.df_results)
+    st.write('Previous queries')
+    st.dataframe(stsess.df_results)
+    st.download_button(label='download results as csv', data=csv_file, mime="text/csv", file_name='price predictions.csv')
